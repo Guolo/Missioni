@@ -1,0 +1,26 @@
+# Dati persistenti (DB, chiave di sessione)
+data/
+
+# Segreti e configurazione locale
+.env
+secret_key.txt
+*.db
+**/secret_key.txt
+
+# File di sviluppo/versionamento.
+.git/
+.gitignore
+.dockerignore
+README.md
+
+# Python.
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Editor/OS.
+.vscode/
+.idea/
+.DS_Store
