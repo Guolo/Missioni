@@ -1,0 +1,13 @@
+services:
+  missioni:
+    build: .
+    container_name: missioni-app
+    ports:
+      - "5002:5000"
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - .env
+    environment:
+      - TZ=Europe/Rome
+    restart: unless-stopped

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Riepilogo{% endblock %}
+
+{% block content %}
+    <div class="riepilogo-header">
+        <h1>Riepilogo missioni</h1>
+        <form method="post" action="{{ url_for('esporta') }}" id="form-esporta">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn-esporta">Esporta</button>
+        </form>
+    </div>
+
+    <div id="messaggi">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="errore">
+                    {% for msg in messages %}
+                        <p>{{ msg }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    {% for giorno, coppie in giorni %}
+        <div class="giorno-blocco">
+            <h2>{{ giorno|data_it }}</h2>
+            <ul class="lista-missioni">
+                {% for a, b in coppie %}
+                    {% if b %}
+                        <li>{{ a.ora|ora_it }} {{ a.scuola|capitalize }} - {{ b.ora|ora_it }} {{ b.scuola|capitalize }}</li>
+                    {% else %}
+                        <li class="missione-spaiata">{{ a.ora|ora_it }} {{ a.scuola|capitalize }} — missione spaiata</li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endfor %}
+    {% if not giorni and not cartelle %}
+        <p>Nessuna missione registrata.</p>
+    {% endif %}
+
+    {% for c in cartelle %}
+        <details class="cartella-esportazione">
+            <summary>
+                <span class="cartella-sinistra">
+                    <span class="cartella-marker">▶</span>
+                    <span class="cartella-titolo">Esportazione del {{ c.etichetta }}</span>
+                </span>
+                <span class="cartella-azioni">
+                    <form method="post" action="{{ url_for('reimporta', esportazione_id=c.id) }}" onclick="event.stopPropagation()" onsubmit="return confirm('Vuoi reimportare questi dati? Saranno nuovamente modificabili e riesportabili.');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="icon-btn" title="Reimporta" aria-label="Reimporta">↺</button>
+                    </form>
+                    <form method="post" action="{{ url_for('elimina_esportazione', esportazione_id=c.id) }}" onclick="event.stopPropagation()" onsubmit="return confirm('Eliminare definitivamente queste missioni?');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="icon-btn icon-danger" title="Elimina" aria-label="Elimina">✕</button>
+                    </form>
+                </span>
+            </summary>
+            <div class="cartella-contenuto">
+                {% for giorno, coppie in c.giorni %}
+                    <div class="giorno-blocco">
+                        <h2>{{ giorno|data_it }}</h2>
+                        <ul class="lista-missioni">
+                            {% for a, b in coppie %}
+                                {% if b %}
+                                    <li>{{ a.ora|ora_it }} {{ a.scuola|capitalize }} - {{ b.ora|ora_it }} {{ b.scuola|capitalize }}</li>
+                                {% else %}
+                                    <li class="missione-spaiata">{{ a.ora|ora_it }} {{ a.scuola|capitalize }} — missione spaiata</li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endfor %}
+            </div>
+        </details>
+    {% endfor %}
+
+    <script>
+        (function () {
+            var form = document.getElementById('form-esporta');
+            if (!form) return;
+
+            // Il download avviene normalmente tramite il form (il browser
+            // resta su questa pagina): ricarichiamo dopo un istante per
+            // mostrare subito l'eventuale nuova cartella di esportazione,
+            // senza interferire con il download stesso.
+            form.addEventListener('submit', function () {
+                setTimeout(function () {
+                    window.location.reload();
+                }, 800);
+            });
+        })();
+    </script>
+{% endblock %}

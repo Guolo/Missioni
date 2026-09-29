@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Missioni{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="nav-inner{% if not session.get('user_id') %} nav-inner-center{% endif %}">
+            <div class="nav-brand">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 20 9 8l4 6 2-3 6 9"></path>
+                </svg>
+                <span>Missioni{% if titolo %}{% if session.get('user_id') %}<span class="nav-titolo-extra"> {{ titolo }}</span>{% else %} {{ titolo }}{% endif %}{% endif %}</span>
+            </div>
+            {% if session.get('user_id') %}
+            <div class="nav-right">
+                <div class="nav-links">
+                    <a href="{{ url_for('index') }}">Nuova</a>
+                    <a href="{{ url_for('riepilogo') }}">Riepilogo</a>
+                    <a href="{{ url_for('utenti') }}" class="nav-link-utenti">Utenti</a>
+                </div>
+                <form method="post" action="{{ url_for('logout') }}" class="nav-logout">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="nav-logout-btn" title="Esci" aria-label="Esci">Esci</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

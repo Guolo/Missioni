@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Modifica missione{% endblock %}
+
+{% block content %}
+    <h1>Modifica missione</h1>
+    <form method="post" action="{{ url_for('modifica', missione_id=missione.id) }}" class="form-missione">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label>
+            Giorno
+            <input type="date" name="giorno" value="{{ missione.giorno }}" required>
+        </label>
+        <label>
+            Ora
+            <input type="time" name="ora" value="{{ missione.ora }}" required>
+        </label>
+        <label>
+            Scuola
+            <select name="scuola" required>
+                {% for s in scuole %}
+                    <option value="{{ s }}" {% if s == missione.scuola %}selected{% endif %}>{{ s|capitalize }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <button type="submit">Salva modifiche</button>
+        <a href="{{ url_for('index') }}" class="annulla">Annulla</a>
+    </form>
+{% endblock %}

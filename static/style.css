@@ -1,0 +1,581 @@
+:root {
+    --bg: #f5f7f5;
+    --surface: #ffffff;
+    --surface-alt: #eef2ef;
+    --ink: #1c2624;
+    --ink-soft: #5c6b67;
+    --accent: #2f6f6b;
+    --accent-dark: #1f4d4a;
+    --accent-soft: #e4efed;
+    --danger: #c0392b;
+    --danger-soft: #fbeae7;
+    --success: #2f8f5b;
+    --border: #e0e5e1;
+    --radius: 12px;
+    --shadow: 0 1px 2px rgba(28, 38, 36, 0.06), 0 4px 14px rgba(28, 38, 36, 0.06);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Manrope", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Navigazione ---------- */
+
+nav {
+    background: var(--accent-dark);
+    border-bottom: 3px solid var(--accent);
+}
+
+.nav-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #f4f5f7;
+    font-weight: 800;
+    font-size: 1.05rem;
+    letter-spacing: 0.01em;
+}
+
+.nav-brand svg {
+    flex-shrink: 0;
+    color: #a9d4cd;
+}
+
+.nav-links {
+    display: flex;
+    gap: 22px;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+}
+
+.nav-inner-center {
+    justify-content: center;
+}
+
+.nav-logout {
+    margin: 0;
+}
+
+.nav-logout-btn {
+    background: transparent;
+    color: #dbe8e5;
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 7px;
+}
+
+.nav-logout-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+nav a {
+    color: #dbe8e5;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 6px 2px;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+nav a:hover {
+    color: #ffffff;
+    border-bottom-color: #a9d4cd;
+    text-decoration: none;
+}
+
+main {
+    max-width: 720px;
+    margin: 32px auto;
+    padding: 0 16px 48px;
+}
+
+h1 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin: 40px 0 16px;
+    color: var(--ink);
+}
+
+h1:first-child {
+    margin-top: 0;
+}
+
+/* ---------- Form nuova missione / modifica ---------- */
+
+.form-missione {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    align-items: flex-end;
+    background: var(--surface);
+    padding: 24px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+}
+
+.form-missione label {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    gap: 6px;
+    flex: 1 1 150px;
+}
+
+.form-missione input,
+.form-missione select {
+    height: 44px;
+    padding: 0 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    color: var(--ink);
+    background: var(--surface);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-missione input:focus,
+.form-missione select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+button {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 11px 20px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+button:hover {
+    background: var(--accent-dark);
+}
+
+a.annulla {
+    color: var(--ink-soft);
+    font-weight: 600;
+    text-decoration: none;
+    padding: 11px 4px;
+}
+
+a.annulla:hover {
+    color: var(--ink);
+    text-decoration: underline;
+}
+
+/* Form grande e comodo su telefono: un campo per riga, testo e bottoni
+   più grandi per un uso semplice anche in mobilità. */
+@media (max-width: 640px) {
+    main {
+        margin: 20px auto;
+        padding: 0 12px 40px;
+    }
+
+    .nav-link-utenti {
+        display: none;
+    }
+
+    .nav-titolo-extra {
+        display: none;
+    }
+
+    .form-missione {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 22px 18px;
+        gap: 20px;
+    }
+
+    .form-missione label {
+        flex: 1 1 auto;
+        font-size: 0.95rem;
+    }
+
+    .form-missione input,
+    .form-missione select {
+        height: 54px;
+        padding: 0 14px;
+        font-size: 1.15rem;
+        border-radius: 10px;
+    }
+
+    .form-missione button {
+        width: 100%;
+        padding: 16px;
+        font-size: 1.1rem;
+        margin-top: 4px;
+    }
+
+    h1 {
+        font-size: 1.35rem;
+    }
+}
+
+/* ---------- Tabella missioni ---------- */
+
+.azioni {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.azioni form {
+    margin: 0;
+    display: inline-flex;
+}
+
+.azioni [hidden] {
+    display: none !important;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    padding: 6px 7px;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 7px;
+    color: var(--ink-soft);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.icon-btn:hover {
+    background: var(--surface-alt);
+    color: var(--ink);
+}
+
+.icon-danger {
+    color: var(--danger);
+}
+
+.icon-danger:hover {
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+
+.icon-save {
+    color: var(--success);
+    font-weight: 700;
+}
+
+.icon-pencil {
+    transform: scaleX(-1);
+    display: block;
+}
+
+.cell-input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    font-size: 0.9rem;
+    font-family: inherit;
+}
+
+.cell-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+}
+
+th, td {
+    text-align: left;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.95rem;
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+tbody tr:hover {
+    background: var(--surface-alt);
+}
+
+th {
+    background: var(--surface-alt);
+    color: var(--ink-soft);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* ---------- Riepilogo ---------- */
+
+.riepilogo-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0;
+    margin-bottom: 28px;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.riepilogo-header h1 {
+    margin: 0;
+}
+
+#form-esporta {
+    margin: 0;
+}
+
+.btn-esporta {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    text-decoration: none;
+    padding: 11px 20px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.btn-esporta:hover {
+    background: var(--accent-dark);
+}
+
+.giorno-blocco {
+    background: var(--surface);
+    padding: 18px 20px;
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+}
+
+.giorno-blocco h2 {
+    margin: 0 0 10px 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--accent-dark);
+}
+
+.lista-missioni {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 0.95rem;
+}
+
+.lista-missioni li {
+    padding: 4px 0;
+}
+
+.errore {
+    background: var(--danger-soft);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    padding: 14px 16px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+}
+
+.errore p {
+    margin: 0;
+}
+
+.missione-spaiata {
+    color: var(--danger);
+    font-weight: 700;
+}
+
+.cartella-esportazione {
+    background: var(--surface);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.cartella-esportazione summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 20px;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+}
+
+.cartella-esportazione summary::-webkit-details-marker {
+    display: none;
+}
+
+.cartella-sinistra {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cartella-marker {
+    display: inline-block;
+    font-size: 0.7rem;
+    color: var(--ink-soft);
+    transition: transform 0.15s ease;
+}
+
+.cartella-esportazione[open] .cartella-marker {
+    transform: rotate(90deg);
+}
+
+.cartella-titolo {
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.cartella-azioni {
+    display: flex;
+    gap: 4px;
+}
+
+.cartella-contenuto {
+    padding: 0 20px 18px 20px;
+}
+
+.cartella-contenuto .giorno-blocco {
+    box-shadow: none;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+}
+
+@media (max-width: 640px) {
+    .riepilogo-header {
+        align-items: flex-start;
+    }
+
+    #form-esporta {
+        width: 100%;
+    }
+
+    .btn-esporta {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* ---------- Login ---------- */
+
+.login-wrap {
+    display: flex;
+    justify-content: center;
+    padding-top: 48px;
+}
+
+.login-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 32px 28px;
+    width: 100%;
+    max-width: 340px;
+}
+
+.login-card h1 {
+    margin: 0 0 20px;
+    text-align: center;
+}
+
+.form-login {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-login label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+}
+
+.form-login input {
+    height: 44px;
+    padding: 0 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+}
+
+.form-login input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.form-login button {
+    margin-top: 4px;
+    padding: 12px;
+}
+
+/* ---------- Utenti ---------- */
+
+.form-utente-password {
+    margin: 0;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}

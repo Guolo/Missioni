@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Accedi{% endblock %}
+
+{% block content %}
+    <div class="login-wrap">
+        <div class="login-card">
+            <h1>Accedi</h1>
+
+            {% if errore %}
+                <div class="errore"><p>{{ errore }}</p></div>
+            {% endif %}
+
+            <form method="post" class="form-login">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="next" value="{{ next }}">
+                <label>
+                    Nome utente
+                    <input type="text" name="username" autocomplete="username" required autofocus>
+                </label>
+                <label>
+                    Password
+                    <input type="password" name="password" autocomplete="current-password" required>
+                </label>
+                <button type="submit">Accedi</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

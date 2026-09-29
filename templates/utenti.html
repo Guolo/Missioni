@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Utenti{% endblock %}
+
+{% block content %}
+    <h1>Utenti</h1>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="errore">
+                {% for msg in messages %}
+                    <p>{{ msg }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nome utente</th>
+                <th>Nuova password</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in utenti %}
+            <tr>
+                <td>{{ u.username }}</td>
+                <td>
+                    <form method="post" action="{{ url_for('modifica_password_utente', utente_id=u.id) }}" class="form-utente-password">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="password" name="password" class="cell-input" placeholder="Almeno 6 caratteri" minlength="6" required>
+                        <button type="submit" class="icon-btn icon-save" title="Aggiorna password" aria-label="Aggiorna password">✓</button>
+                    </form>
+                </td>
+                <td class="azioni">
+                    <form method="post" action="{{ url_for('elimina_utente', utente_id=u.id) }}" onsubmit="return confirm('Eliminare l\'utente «{{ u.username }}»?');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="icon-btn icon-danger" title="Elimina" aria-label="Elimina">✕</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="3">Nessun utente.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h1>Nuovo utente</h1>
+    <form method="post" action="{{ url_for('aggiungi_utente') }}" class="form-missione">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label>
+            Nome utente
+            <input type="text" name="username" required>
+        </label>
+        <label>
+            Password
+            <input type="password" name="password" minlength="6" required>
+        </label>
+        <button type="submit">Aggiungi</button>
+    </form>
+{% endblock %}
