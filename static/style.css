@@ -780,3 +780,241 @@ body.modal-aperta {
 @media (prefers-reduced-motion: reduce) {
     .confirm-card, .confirm-overlay { animation-duration: 0.01s; }
 }
+
+/* ---------- Pagina utenti: intestazione, badge, finestre ---------- */
+
+.pagina-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.pagina-header h1 {
+    margin: 0;
+}
+
+.btn-piu {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 1.7rem;
+    font-weight: 600;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.messaggio-ok {
+    background: var(--accent-soft);
+    border: 1px solid var(--success);
+    color: var(--accent-dark);
+    padding: 14px 16px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+}
+
+.messaggio-ok p {
+    margin: 0;
+}
+
+.badge-permesso {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.badge-admin {
+    background: var(--accent-soft);
+    color: var(--accent-dark);
+}
+
+.badge-riepilogo {
+    background: var(--surface-alt);
+    color: var(--ink-soft);
+    border: 1px solid var(--border);
+}
+
+.badge-tu {
+    margin-left: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+    background: var(--surface-alt);
+    border-radius: 6px;
+    padding: 2px 6px;
+}
+
+.azioni-utenti {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.btn-small {
+    padding: 7px 12px;
+    font-size: 0.85rem;
+    border-radius: 8px;
+    background: var(--surface-alt);
+    color: var(--ink);
+    border: 1px solid var(--border);
+}
+
+.btn-small:hover {
+    background: var(--accent-soft);
+    color: var(--accent-dark);
+}
+
+.dialog-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(28, 38, 36, 0.45);
+    backdrop-filter: blur(2px);
+    z-index: 105;
+    overflow-y: auto;
+    animation: toast-fade-in 0.18s ease-out;
+}
+
+.dialog-overlay[hidden] {
+    display: none;
+}
+
+.dialog-card {
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 26px 24px 22px;
+    width: 100%;
+    max-width: 400px;
+    margin: auto;
+    box-shadow: 0 12px 40px rgba(28, 38, 36, 0.25);
+    animation: toast-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.dialog-card h2 {
+    margin: 0 0 4px;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--ink);
+}
+
+.dialog-sottotitolo {
+    margin: 0 0 4px;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+}
+
+.form-dialog {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.form-dialog label:not(.permesso-opzione) {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+}
+
+.form-dialog input[type="text"],
+.form-dialog input[type="password"] {
+    height: 46px;
+    padding: 0 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    color: var(--ink);
+}
+
+.form-dialog input[type="text"]:focus,
+.form-dialog input[type="password"]:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.form-dialog input:invalid:not(:placeholder-shown):not(:focus) {
+    border-color: var(--danger);
+}
+
+.permessi-scelta {
+    border: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.permessi-scelta legend {
+    padding: 0;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+}
+
+.permesso-opzione {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.permesso-opzione:has(input:checked) {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}
+
+.permesso-opzione input {
+    margin-top: 3px;
+    accent-color: var(--accent);
+}
+
+.permesso-opzione strong {
+    display: block;
+    color: var(--ink);
+    font-size: 0.95rem;
+}
+
+.permesso-opzione small {
+    display: block;
+    margin-top: 2px;
+    color: var(--ink-soft);
+    font-size: 0.82rem;
+    line-height: 1.35;
+}
+
+.dialog-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.dialog-actions button {
+    flex: 1;
+    padding: 13px 10px;
+    font-size: 1rem;
+}
+
+@media (max-width: 640px) {
+    .azioni-utenti .btn-small {
+        flex: 1 1 auto;
+    }
+}

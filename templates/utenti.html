@@ -2,15 +2,36 @@
 {% block title %}Utenti{% endblock %}
 
 {% block content %}
-    <h1>Utenti</h1>
+    {% macro scelta_permesso(selezionato) %}
+        <fieldset class="permessi-scelta">
+            <legend>Permessi</legend>
+            <label class="permesso-opzione">
+                <input type="radio" name="permesso" value="admin" {% if selezionato == 'admin' %}checked{% endif %} required>
+                <span>
+                    <strong>Admin</strong>
+                    <small>Accesso a tutta l'applicazione.</small>
+                </span>
+            </label>
+            <label class="permesso-opzione">
+                <input type="radio" name="permesso" value="riepilogo" {% if selezionato == 'riepilogo' %}checked{% endif %}>
+                <span>
+                    <strong>Riepilogo</strong>
+                    <small>Solo la pagina Riepilogo, senza esportare, eliminare o reimportare.</small>
+                </span>
+            </label>
+        </fieldset>
+    {% endmacro %}
 
-    {% with messages = get_flashed_messages() %}
+    <div class="pagina-header">
+        <h1>Utenti</h1>
+        <button type="button" class="btn-piu" data-apri="dlg-nuovo" title="Aggiungi utente" aria-label="Aggiungi utente">+</button>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <div class="errore">
-                {% for msg in messages %}
-                    <p>{{ msg }}</p>
-                {% endfor %}
-            </div>
+            {% for categoria, msg in messages %}
+                <div class="{{ 'messaggio-ok' if categoria == 'ok' else 'errore' }}"><p>{{ msg }}</p></div>
+            {% endfor %}
         {% endif %}
     {% endwith %}
 
@@ -18,26 +39,37 @@
         <thead>
             <tr>
                 <th>Nome utente</th>
-                <th>Nuova password</th>
+                <th>Permesso</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
             {% for u in utenti %}
             <tr>
-                <td>{{ u.username }}</td>
                 <td>
-                    <form method="post" action="{{ url_for('modifica_password_utente', utente_id=u.id) }}" class="form-utente-password">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <input type="password" name="password" class="cell-input" placeholder="Almeno 6 caratteri" minlength="6" required>
-                        <button type="submit" class="icon-btn icon-save" title="Aggiorna password" aria-label="Aggiorna password">✓</button>
-                    </form>
+                    {{ u.username }}
+                    {% if u.id == session.get('user_id') %}<span class="badge-tu">tu</span>{% endif %}
                 </td>
-                <td class="azioni">
-                    <form method="post" action="{{ url_for('elimina_utente', utente_id=u.id) }}" data-confirm="L'utente «{{ u.username }}» verrà eliminato." data-confirm-title="Eliminare l'utente?" data-confirm-ok="Elimina" data-confirm-danger="1">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <button type="submit" class="icon-btn icon-danger" title="Elimina" aria-label="Elimina">✕</button>
-                    </form>
+                <td><span class="badge-permesso badge-{{ u.permesso }}">{{ u.permesso|capitalize }}</span></td>
+                <td>
+                    <div class="azioni azioni-utenti">
+                        <button type="button" class="btn-small"
+                                data-apri="dlg-password"
+                                data-action="{{ url_for('modifica_password_utente', utente_id=u.id) }}"
+                                data-nome="{{ u.username }}">Cambio password</button>
+                        <button type="button" class="btn-small"
+                                data-apri="dlg-permessi"
+                                data-action="{{ url_for('modifica_permesso_utente', utente_id=u.id) }}"
+                                data-nome="{{ u.username }}"
+                                data-permesso="{{ u.permesso }}">Permessi</button>
+                        <form method="post" action="{{ url_for('elimina_utente', utente_id=u.id) }}"
+                              data-confirm="L'utente «{{ u.username }}» verrà eliminato."
+                              data-confirm-title="Eliminare l'utente?"
+                              data-confirm-ok="Elimina" data-confirm-danger="1">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="icon-btn icon-danger" title="Elimina" aria-label="Elimina">✕</button>
+                        </form>
+                    </div>
                 </td>
             </tr>
             {% else %}
@@ -48,17 +80,136 @@
         </tbody>
     </table>
 
-    <h1>Nuovo utente</h1>
-    <form method="post" action="{{ url_for('aggiungi_utente') }}" class="form-missione">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <label>
-            Nome utente
-            <input type="text" name="username" required>
-        </label>
-        <label>
-            Password
-            <input type="password" name="password" minlength="6" required>
-        </label>
-        <button type="submit">Aggiungi</button>
-    </form>
+    <!-- Nuovo utente -->
+    <div class="dialog-overlay" id="dlg-nuovo" hidden>
+        <div class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="dlg-nuovo-titolo">
+            <h2 id="dlg-nuovo-titolo">Nuovo utente</h2>
+            <form method="post" action="{{ url_for('aggiungi_utente') }}" class="form-dialog" data-conferma-password>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <label>
+                    Nome utente
+                    <input type="text" name="username" autocomplete="off" placeholder=" " required>
+                </label>
+                <label>
+                    Password
+                    <input type="password" name="password" minlength="6" autocomplete="new-password" placeholder="Almeno 6 caratteri" required>
+                </label>
+                <label>
+                    Conferma password
+                    <input type="password" name="conferma_password" minlength="6" autocomplete="new-password" placeholder=" " required>
+                </label>
+                {{ scelta_permesso('riepilogo') }}
+                <div class="dialog-actions">
+                    <button type="button" class="btn-secondary" data-chiudi>Annulla</button>
+                    <button type="submit">Aggiungi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Cambio password -->
+    <div class="dialog-overlay" id="dlg-password" hidden>
+        <div class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="dlg-password-titolo">
+            <h2 id="dlg-password-titolo">Cambio password</h2>
+            <p class="dialog-sottotitolo">Utente: <strong data-nome-utente></strong></p>
+            <form method="post" action="" class="form-dialog" data-conferma-password>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <label>
+                    Nuova password
+                    <input type="password" name="password" minlength="6" autocomplete="new-password" placeholder="Almeno 6 caratteri" required>
+                </label>
+                <label>
+                    Conferma nuova password
+                    <input type="password" name="conferma_password" minlength="6" autocomplete="new-password" placeholder=" " required>
+                </label>
+                <div class="dialog-actions">
+                    <button type="button" class="btn-secondary" data-chiudi>Annulla</button>
+                    <button type="submit">Aggiorna</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Permessi -->
+    <div class="dialog-overlay" id="dlg-permessi" hidden>
+        <div class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="dlg-permessi-titolo">
+            <h2 id="dlg-permessi-titolo">Permessi</h2>
+            <p class="dialog-sottotitolo">Utente: <strong data-nome-utente></strong></p>
+            <form method="post" action="" class="form-dialog">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                {{ scelta_permesso('') }}
+                <div class="dialog-actions">
+                    <button type="button" class="btn-secondary" data-chiudi>Annulla</button>
+                    <button type="submit">Salva</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var aperta = null;
+            var focusPrecedente = null;
+
+            function apri(id, trigger) {
+                var overlay = document.getElementById(id);
+                if (!overlay) return;
+                var form = overlay.querySelector('form');
+                form.reset();
+                form.querySelectorAll('input').forEach(function (i) { i.setCustomValidity(''); });
+
+                // Dati specifici dell'utente scelto (cambio password / permessi).
+                if (trigger.dataset.action) form.action = trigger.dataset.action;
+                var nome = overlay.querySelector('[data-nome-utente]');
+                if (nome) nome.textContent = trigger.dataset.nome || '';
+                if (trigger.dataset.permesso) {
+                    var radio = form.querySelector('input[name="permesso"][value="' + trigger.dataset.permesso + '"]');
+                    if (radio) radio.checked = true;
+                }
+
+                focusPrecedente = trigger;
+                aperta = overlay;
+                overlay.hidden = false;
+                document.body.classList.add('modal-aperta');
+                var primo = form.querySelector('input:not([type="hidden"]):not([type="radio"])') ||
+                            form.querySelector('input[type="radio"]:checked');
+                if (primo) primo.focus();
+            }
+
+            function chiudi() {
+                if (!aperta) return;
+                aperta.hidden = true;
+                aperta = null;
+                document.body.classList.remove('modal-aperta');
+                if (focusPrecedente) focusPrecedente.focus();
+            }
+
+            document.querySelectorAll('[data-apri]').forEach(function (b) {
+                b.addEventListener('click', function () { apri(b.dataset.apri, b); });
+            });
+            document.querySelectorAll('[data-chiudi]').forEach(function (b) {
+                b.addEventListener('click', chiudi);
+            });
+            document.querySelectorAll('.dialog-overlay').forEach(function (o) {
+                o.addEventListener('mousedown', function (e) {
+                    if (e.target === o) chiudi();
+                });
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') chiudi();
+            });
+
+            // Conferma password: i due campi devono coincidere.
+            document.querySelectorAll('form[data-conferma-password]').forEach(function (form) {
+                var p = form.querySelector('input[name="password"]');
+                var c = form.querySelector('input[name="conferma_password"]');
+                function controlla() {
+                    c.setCustomValidity(p.value !== c.value ? 'Le due password non coincidono.' : '');
+                }
+                p.addEventListener('input', controlla);
+                c.addEventListener('input', controlla);
+                form.addEventListener('submit', controlla);
+            });
+        })();
+    </script>
 {% endblock %}

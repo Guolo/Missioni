@@ -378,10 +378,15 @@ def init_db():
         CREATE TABLE IF NOT EXISTS utenti (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT NOT NULL UNIQUE,
-            password_hash TEXT NOT NULL
+            password_hash TEXT NOT NULL,
+            permesso TEXT NOT NULL DEFAULT 'admin'
         )
         """
     )
+    # Database creato prima dei permessi: gli utenti esistenti restano admin.
+    colonne_utenti = [r[1] for r in conn.execute("PRAGMA table_info(utenti)").fetchall()]
+    if "permesso" not in colonne_utenti:
+        conn.execute("ALTER TABLE utenti ADD COLUMN permesso TEXT NOT NULL DEFAULT 'admin'")
     # Utente predefinito al primo avvio: admin/admin. Va rinominato o
     # comunque va cambiata la password dalla pagina "Utenti" prima di
     # esporre l'app su internet.
@@ -437,12 +442,48 @@ def _azzera_tentativi(ip):
     TENTATIVI_LOGIN.pop(ip, None)
 
 
+# Permessi disponibili: "admin" (tutta l'app) e "riepilogo" (solo la
+# pagina Riepilogo, in sola lettura).
+PERMESSI = ("admin", "riepilogo")
+
+
+def _utente_corrente():
+    """Utente della sessione, riletto dal database a ogni richiesta: così
+    un cambio di permessi (o l'eliminazione dell'utente) vale subito."""
+    if "utente_corrente" not in g:
+        g.utente_corrente = None
+        uid = session.get("user_id")
+        if uid:
+            g.utente_corrente = get_db().execute(
+                "SELECT id, username, permesso FROM utenti WHERE id = ?", (uid,)
+            ).fetchone()
+    return g.utente_corrente
+
+
 def login_required(view):
     """Richiede una sessione autenticata; altrimenti reindirizza al login."""
     @wraps(view)
     def wrapped(*args, **kwargs):
-        if not session.get("user_id"):
+        if not _utente_corrente():
+            session.clear()
             return redirect(url_for("login", next=request.path))
+        return view(*args, **kwargs)
+    return wrapped
+
+
+def admin_required(view):
+    """Richiede il permesso "admin"; chi ha solo "riepilogo" viene
+    rimandato alla pagina Riepilogo."""
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        utente = _utente_corrente()
+        if not utente:
+            session.clear()
+            return redirect(url_for("login", next=request.path))
+        if utente["permesso"] != "admin":
+            if request.method == "POST":
+                flash("Non hai i permessi per questa operazione.")
+            return redirect(url_for("riepilogo"))
         return view(*args, **kwargs)
     return wrapped
 
@@ -456,6 +497,12 @@ def _csrf_token():
 @app.context_processor
 def _inserisci_csrf_token():
     return {"csrf_token": _csrf_token}
+
+
+@app.context_processor
+def _inserisci_permessi():
+    utente = _utente_corrente()
+    return {"is_admin": bool(utente and utente["permesso"] == "admin")}
 
 
 @app.context_processor
@@ -501,7 +548,9 @@ def login():
                 destinazione = request.form.get("next") or ""
                 # Accetta solo percorsi interni all'app (mai un URL esterno).
                 if not destinazione.startswith("/") or destinazione.startswith("//"):
-                    destinazione = url_for("index")
+                    destinazione = url_for(
+                        "index" if utente["permesso"] == "admin" else "riepilogo"
+                    )
                 return redirect(destinazione)
             _registra_tentativo_fallito(ip)
             errore = "Nome utente o password non validi."
@@ -518,7 +567,7 @@ def logout():
 
 
 @app.route("/")
-@login_required
+@admin_required
 def index():
     db = get_db()
     missioni = db.execute(
@@ -537,7 +586,7 @@ def index():
 
 
 @app.route("/aggiungi", methods=["POST"])
-@login_required
+@admin_required
 def aggiungi():
     giorno = request.form["giorno"]
     ora = request.form["ora"]
@@ -555,7 +604,7 @@ def aggiungi():
 
 
 @app.route("/modifica/<int:missione_id>", methods=["POST"])
-@login_required
+@admin_required
 def modifica(missione_id):
     db = get_db()
     giorno = request.form["giorno"]
@@ -572,7 +621,7 @@ def modifica(missione_id):
 
 
 @app.route("/elimina/<int:missione_id>", methods=["POST"])
-@login_required
+@admin_required
 def elimina(missione_id):
     db = get_db()
     db.execute("DELETE FROM missioni WHERE id = ?", (missione_id,))
@@ -639,7 +688,7 @@ def riepilogo():
 
 
 @app.route("/reimporta/<int:esportazione_id>", methods=["POST"])
-@login_required
+@admin_required
 def reimporta(esportazione_id):
     """Riporta le missioni di una cartella di esportazione allo stato
     precedente (non esportate) ed elimina la cartella, ormai vuota."""
@@ -654,7 +703,7 @@ def reimporta(esportazione_id):
 
 
 @app.route("/elimina_esportazione/<int:esportazione_id>", methods=["POST"])
-@login_required
+@admin_required
 def elimina_esportazione(esportazione_id):
     """Elimina definitivamente dal database le missioni di una cartella di
     esportazione, insieme alla cartella stessa."""
@@ -752,7 +801,7 @@ def _genera_pdf_esportazione(righe, mese_anno=""):
 
 
 @app.route("/esporta", methods=["POST"])
-@login_required
+@admin_required
 def esporta():
     db = get_db()
     missioni = db.execute(
@@ -826,22 +875,43 @@ def esporta():
 
 
 @app.route("/utenti")
-@login_required
+@admin_required
 def utenti():
     db = get_db()
-    lista = db.execute("SELECT id, username FROM utenti ORDER BY username").fetchall()
+    lista = db.execute(
+        "SELECT id, username, permesso FROM utenti ORDER BY username COLLATE NOCASE"
+    ).fetchall()
     return render_template("utenti.html", utenti=lista)
 
 
+def _valida_password(password, conferma):
+    """Restituisce un messaggio d'errore, oppure None se la password va bene."""
+    if len(password) < 6:
+        return "La password deve avere almeno 6 caratteri."
+    if password != conferma:
+        return "Le due password non coincidono."
+    return None
+
+
+def _numero_admin():
+    return get_db().execute(
+        "SELECT COUNT(*) AS n FROM utenti WHERE permesso = 'admin'"
+    ).fetchone()["n"]
+
+
 @app.route("/utenti/aggiungi", methods=["POST"])
-@login_required
+@admin_required
 def aggiungi_utente():
     username = request.form.get("username", "").strip()
     password = request.form.get("password", "")
+    conferma = request.form.get("conferma_password", "")
+    permesso = request.form.get("permesso", "")
     if not username or not password:
         flash("Inserisci nome utente e password.")
-    elif len(password) < 6:
-        flash("La password deve avere almeno 6 caratteri.")
+    elif permesso not in PERMESSI:
+        flash("Scegli un permesso valido.")
+    elif _valida_password(password, conferma):
+        flash(_valida_password(password, conferma))
     else:
         db = get_db()
         esiste = db.execute(
@@ -851,37 +921,72 @@ def aggiungi_utente():
             flash(f"Esiste già un utente chiamato «{username}».")
         else:
             db.execute(
-                "INSERT INTO utenti (username, password_hash) VALUES (?, ?)",
-                (username, generate_password_hash(password)),
+                "INSERT INTO utenti (username, password_hash, permesso) VALUES (?, ?, ?)",
+                (username, generate_password_hash(password), permesso),
             )
             db.commit()
+            flash(f"Utente «{username}» aggiunto.", "ok")
     return redirect(url_for("utenti"))
 
 
 @app.route("/utenti/<int:utente_id>/password", methods=["POST"])
-@login_required
+@admin_required
 def modifica_password_utente(utente_id):
     password = request.form.get("password", "")
-    if len(password) < 6:
-        flash("La password deve avere almeno 6 caratteri.")
+    conferma = request.form.get("conferma_password", "")
+    errore = _valida_password(password, conferma)
+    db = get_db()
+    esiste = db.execute("SELECT 1 FROM utenti WHERE id = ?", (utente_id,)).fetchone()
+    if not esiste:
+        flash("Utente non trovato.")
+    elif errore:
+        flash(errore)
     else:
-        db = get_db()
         db.execute(
             "UPDATE utenti SET password_hash = ? WHERE id = ?",
             (generate_password_hash(password), utente_id),
         )
         db.commit()
-        flash("Password aggiornata.")
+        flash("Password aggiornata.", "ok")
+    return redirect(url_for("utenti"))
+
+
+@app.route("/utenti/<int:utente_id>/permesso", methods=["POST"])
+@admin_required
+def modifica_permesso_utente(utente_id):
+    permesso = request.form.get("permesso", "")
+    db = get_db()
+    utente = db.execute(
+        "SELECT id, permesso FROM utenti WHERE id = ?", (utente_id,)
+    ).fetchone()
+    if not utente:
+        flash("Utente non trovato.")
+    elif permesso not in PERMESSI:
+        flash("Scegli un permesso valido.")
+    elif utente["permesso"] == "admin" and permesso != "admin" and _numero_admin() <= 1:
+        flash("Deve restare almeno un amministratore.")
+    else:
+        db.execute("UPDATE utenti SET permesso = ? WHERE id = ?", (permesso, utente_id))
+        db.commit()
+        flash("Permessi aggiornati.", "ok")
+        if utente_id == session.get("user_id") and permesso != "admin":
+            # Ha tolto a se stesso i permessi di admin: non può più stare qui.
+            return redirect(url_for("riepilogo"))
     return redirect(url_for("utenti"))
 
 
 @app.route("/utenti/<int:utente_id>/elimina", methods=["POST"])
-@login_required
+@admin_required
 def elimina_utente(utente_id):
     db = get_db()
-    totale = db.execute("SELECT COUNT(*) AS n FROM utenti").fetchone()["n"]
-    if totale <= 1:
-        flash("Non puoi eliminare l'unico utente rimasto.")
+    utente = db.execute(
+        "SELECT id, permesso FROM utenti WHERE id = ?", (utente_id,)
+    ).fetchone()
+    if not utente:
+        flash("Utente non trovato.")
+        return redirect(url_for("utenti"))
+    if utente["permesso"] == "admin" and _numero_admin() <= 1:
+        flash("Non puoi eliminare l'ultimo amministratore.")
         return redirect(url_for("utenti"))
 
     db.execute("DELETE FROM utenti WHERE id = ?", (utente_id,))

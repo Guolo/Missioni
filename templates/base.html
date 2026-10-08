@@ -29,9 +29,9 @@
             {% if session.get('user_id') %}
             <div class="nav-right">
                 <div class="nav-links">
-                    <a href="{{ url_for('index') }}">Nuova</a>
+                    {% if is_admin %}<a href="{{ url_for('index') }}">Nuova</a>{% endif %}
                     <a href="{{ url_for('riepilogo') }}">Riepilogo</a>
-                    <a href="{{ url_for('utenti') }}" class="nav-link-utenti">Utenti</a>
+                    {% if is_admin %}<a href="{{ url_for('utenti') }}" class="nav-link-utenti">Utenti</a>{% endif %}
                 </div>
                 <form method="post" action="{{ url_for('logout') }}" class="nav-logout">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

@@ -4,10 +4,12 @@
 {% block content %}
     <div class="riepilogo-header">
         <h1>Riepilogo missioni</h1>
+        {% if is_admin %}
         <form method="post" action="{{ url_for('esporta') }}" id="form-esporta">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn-esporta">Esporta</button>
         </form>
+        {% endif %}
     </div>
 
     <div id="messaggi">
@@ -47,6 +49,7 @@
                     <span class="cartella-marker">▶</span>
                     <span class="cartella-titolo">Esportazione del {{ c.etichetta }}</span>
                 </span>
+                {% if is_admin %}
                 <span class="cartella-azioni">
                     <form method="post" action="{{ url_for('reimporta', esportazione_id=c.id) }}" onclick="event.stopPropagation()" data-confirm="I dati saranno nuovamente modificabili e riesportabili." data-confirm-title="Reimportare i dati?" data-confirm-ok="Reimporta">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -57,6 +60,7 @@
                         <button type="submit" class="icon-btn icon-danger" title="Elimina" aria-label="Elimina">✕</button>
                     </form>
                 </span>
+                {% endif %}
             </summary>
             <div class="cartella-contenuto">
                 {% for giorno, coppie in c.giorni %}
