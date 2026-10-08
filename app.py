@@ -550,6 +550,7 @@ def aggiungi():
         (giorno, ora, scuola),
     )
     db.commit()
+    flash(f"{scuola.capitalize()} · {ora}", "successo")
     return redirect(url_for("index"))
 
 
