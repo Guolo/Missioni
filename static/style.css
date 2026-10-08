@@ -579,3 +579,204 @@ th {
     gap: 6px;
     align-items: center;
 }
+
+/* ---------- Popup di conferma (toast) ---------- */
+
+.toast-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(28, 38, 36, 0.35);
+    backdrop-filter: blur(2px);
+    z-index: 100;
+    animation: toast-fade-in 0.2s ease-out;
+}
+
+.toast-overlay.toast-out {
+    animation: toast-fade-out 0.35s ease-in forwards;
+}
+
+.toast-card {
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 28px 36px 26px;
+    text-align: center;
+    box-shadow: 0 12px 40px rgba(28, 38, 36, 0.25);
+    min-width: 240px;
+    animation: toast-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.toast-out .toast-card {
+    animation: toast-shrink 0.35s ease-in forwards;
+}
+
+.toast-check {
+    width: 76px;
+    height: 76px;
+    display: block;
+    margin: 0 auto 12px;
+}
+
+.toast-circle {
+    fill: var(--accent-soft);
+    stroke: var(--success);
+    stroke-width: 3;
+    stroke-dasharray: 145;
+    stroke-dashoffset: 145;
+    animation: toast-draw 0.5s 0.1s ease-out forwards;
+}
+
+.toast-tick {
+    fill: none;
+    stroke: var(--success);
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 40;
+    stroke-dashoffset: 40;
+    animation: toast-draw 0.35s 0.5s ease-out forwards;
+}
+
+.toast-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--ink);
+}
+
+.toast-detail {
+    margin-top: 4px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+}
+
+@keyframes toast-draw { to { stroke-dashoffset: 0; } }
+@keyframes toast-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes toast-fade-out { to { opacity: 0; } }
+@keyframes toast-pop {
+    from { transform: scale(0.6); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+@keyframes toast-shrink { to { transform: scale(0.9); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+    .toast-card, .toast-circle, .toast-tick { animation-duration: 0.01s; animation-delay: 0s; }
+}
+
+/* Il popup di conferma serve solo su dispositivi touch: da computer
+   la nuova missione si vede subito nella tabella sotto il form. */
+@media (hover: hover) and (pointer: fine) {
+    .toast-overlay {
+        display: none;
+    }
+}
+
+/* ---------- Finestra di conferma ---------- */
+
+.confirm-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(28, 38, 36, 0.45);
+    backdrop-filter: blur(2px);
+    z-index: 110;
+    animation: toast-fade-in 0.18s ease-out;
+}
+
+.confirm-overlay[hidden] {
+    display: none;
+}
+
+.confirm-overlay.confirm-out {
+    animation: toast-fade-out 0.18s ease-in forwards;
+}
+
+.confirm-card {
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 28px 24px 22px;
+    width: 100%;
+    max-width: 360px;
+    text-align: center;
+    box-shadow: 0 12px 40px rgba(28, 38, 36, 0.25);
+    animation: toast-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.confirm-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin: 0 auto 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.confirm-icon svg[hidden] {
+    display: none;
+}
+
+.confirm-icon-red {
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+
+.confirm-icon-teal {
+    background: var(--accent-soft);
+    color: var(--accent-dark);
+}
+
+.confirm-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--ink);
+}
+
+.confirm-text {
+    margin-top: 6px;
+    font-size: 0.95rem;
+    line-height: 1.45;
+    color: var(--ink-soft);
+}
+
+.confirm-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.confirm-actions button {
+    flex: 1;
+    padding: 13px 10px;
+    font-size: 1rem;
+}
+
+.btn-secondary {
+    background: var(--surface-alt);
+    color: var(--ink);
+}
+
+.btn-secondary:hover {
+    background: var(--border);
+}
+
+.btn-danger {
+    background: var(--danger);
+}
+
+.btn-danger:hover {
+    background: #a02e22;
+}
+
+body.modal-aperta {
+    overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .confirm-card, .confirm-overlay { animation-duration: 0.01s; }
+}

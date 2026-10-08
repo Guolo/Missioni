@@ -8,6 +8,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon/favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon/apple-touch-icon.png') }}">
+    <meta name="theme-color" content="#1f4d4a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Missioni">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 <body>
     <nav>
@@ -36,5 +44,118 @@
     <main>
         {% block content %}{% endblock %}
     </main>
+
+    <div class="confirm-overlay" id="confirm-modal" hidden>
+        <div class="confirm-card" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-text">
+            <div class="confirm-icon" id="confirm-icon">
+                <svg class="confirm-icon-danger" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path>
+                    <path d="M12 9v4"></path>
+                    <path d="M12 17h.01"></path>
+                </svg>
+                <svg class="confirm-icon-neutral" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden>
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                    <path d="M3 3v5h5"></path>
+                </svg>
+            </div>
+            <div class="confirm-title" id="confirm-title"></div>
+            <div class="confirm-text" id="confirm-text"></div>
+            <div class="confirm-actions">
+                <button type="button" class="btn-secondary" id="confirm-cancel">Annulla</button>
+                <button type="button" id="confirm-ok">Conferma</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Finestra di conferma personalizzata: qualunque <form> con
+        // l'attributo data-confirm la mostra prima di inviare i dati.
+        (function () {
+            var overlay = document.getElementById('confirm-modal');
+            var titolo = document.getElementById('confirm-title');
+            var testo = document.getElementById('confirm-text');
+            var ok = document.getElementById('confirm-ok');
+            var annulla = document.getElementById('confirm-cancel');
+            var icona = document.getElementById('confirm-icon');
+            var iconaDanger = icona.querySelector('.confirm-icon-danger');
+            var iconaNeutral = icona.querySelector('.confirm-icon-neutral');
+            var inAttesa = null;
+            var focusPrecedente = null;
+
+            function apri(form) {
+                var danger = form.hasAttribute('data-confirm-danger');
+                inAttesa = form;
+                focusPrecedente = document.activeElement;
+                titolo.textContent = form.getAttribute('data-confirm-title') || 'Confermi?';
+                testo.textContent = form.getAttribute('data-confirm');
+                ok.textContent = form.getAttribute('data-confirm-ok') || 'Conferma';
+                ok.className = danger ? 'btn-danger' : '';
+                icona.className = 'confirm-icon ' + (danger ? 'confirm-icon-red' : 'confirm-icon-teal');
+                iconaDanger.hidden = !danger;
+                iconaNeutral.hidden = danger;
+                overlay.hidden = false;
+                overlay.classList.remove('confirm-out');
+                document.body.classList.add('modal-aperta');
+                annulla.focus();
+            }
+
+            function chiudi() {
+                inAttesa = null;
+                overlay.classList.add('confirm-out');
+                document.body.classList.remove('modal-aperta');
+                setTimeout(function () {
+                    overlay.hidden = true;
+                    overlay.classList.remove('confirm-out');
+                }, 180);
+                if (focusPrecedente && focusPrecedente.focus) focusPrecedente.focus();
+            }
+
+            document.addEventListener('submit', function (e) {
+                var f = e.target;
+                if (!f.hasAttribute || !f.hasAttribute('data-confirm')) return;
+                e.preventDefault();
+                apri(f);
+            });
+
+            ok.addEventListener('click', function () {
+                var f = inAttesa;
+                if (!f) return;
+                ok.disabled = true;
+                f.submit();
+            });
+            annulla.addEventListener('click', chiudi);
+            overlay.addEventListener('click', function (e) {
+                if (e.target === overlay) chiudi();
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && !overlay.hidden) chiudi();
+            });
+        })();
+    </script>
+
+    {% set ok = get_flashed_messages(category_filter=["successo"]) %}
+    {% if ok %}
+    <div class="toast-overlay" id="toast" role="status" aria-live="polite">
+        <div class="toast-card">
+            <svg class="toast-check" viewBox="0 0 52 52" aria-hidden="true">
+                <circle class="toast-circle" cx="26" cy="26" r="23"></circle>
+                <path class="toast-tick" d="M15 27l8 8 14-16"></path>
+            </svg>
+            <div class="toast-title">Missione aggiunta!</div>
+            <div class="toast-detail">{{ ok[0] }}</div>
+        </div>
+    </div>
+    <script>
+        (function () {
+            var t = document.getElementById('toast');
+            try { if (navigator.vibrate) navigator.vibrate(40); } catch (e) {}
+            function chiudi() {
+                t.classList.add('toast-out');
+                setTimeout(function () { t.remove(); }, 350);
+            }
+            t.addEventListener('click', chiudi);
+            setTimeout(chiudi, 2200);
+        })();
+    </script>
+    {% endif %}
 </body>
 </html>

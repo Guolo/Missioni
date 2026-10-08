@@ -34,7 +34,7 @@
                     </form>
                 </td>
                 <td class="azioni">
-                    <form method="post" action="{{ url_for('elimina_utente', utente_id=u.id) }}" onsubmit="return confirm('Eliminare l\'utente «{{ u.username }}»?');">
+                    <form method="post" action="{{ url_for('elimina_utente', utente_id=u.id) }}" data-confirm="L'utente «{{ u.username }}» verrà eliminato." data-confirm-title="Eliminare l'utente?" data-confirm-ok="Elimina" data-confirm-danger="1">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="icon-btn icon-danger" title="Elimina" aria-label="Elimina">✕</button>
                     </form>

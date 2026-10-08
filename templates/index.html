@@ -60,7 +60,7 @@
                             <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
                         </svg>
                     </button>
-                    <form data-view="{{ m.id }}" method="post" action="{{ url_for('elimina', missione_id=m.id) }}" onsubmit="return confirm('Eliminare questa missione?');">
+                    <form data-view="{{ m.id }}" method="post" action="{{ url_for('elimina', missione_id=m.id) }}" data-confirm="Questa missione verrà rimossa definitivamente." data-confirm-title="Eliminare la missione?" data-confirm-ok="Elimina" data-confirm-danger="1">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="icon-btn icon-danger" title="Elimina" aria-label="Elimina">✕</button>
                     </form>
@@ -102,6 +102,16 @@
                 try {
                     localStorage.setItem(chiave, select.value);
                 } catch (e) {}
+            });
+        })();
+
+        // Evita doppi inserimenti se si tocca due volte "Aggiungi".
+        (function () {
+            var f = document.querySelector('form.form-missione');
+            if (!f) return;
+            f.addEventListener('submit', function () {
+                var b = f.querySelector('button[type="submit"]');
+                if (b) { b.disabled = true; b.textContent = 'Salvo…'; }
             });
         })();
 

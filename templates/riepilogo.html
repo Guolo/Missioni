@@ -48,11 +48,11 @@
                     <span class="cartella-titolo">Esportazione del {{ c.etichetta }}</span>
                 </span>
                 <span class="cartella-azioni">
-                    <form method="post" action="{{ url_for('reimporta', esportazione_id=c.id) }}" onclick="event.stopPropagation()" onsubmit="return confirm('Vuoi reimportare questi dati? Saranno nuovamente modificabili e riesportabili.');">
+                    <form method="post" action="{{ url_for('reimporta', esportazione_id=c.id) }}" onclick="event.stopPropagation()" data-confirm="I dati saranno nuovamente modificabili e riesportabili." data-confirm-title="Reimportare i dati?" data-confirm-ok="Reimporta">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="icon-btn" title="Reimporta" aria-label="Reimporta">↺</button>
                     </form>
-                    <form method="post" action="{{ url_for('elimina_esportazione', esportazione_id=c.id) }}" onclick="event.stopPropagation()" onsubmit="return confirm('Eliminare definitivamente queste missioni?');">
+                    <form method="post" action="{{ url_for('elimina_esportazione', esportazione_id=c.id) }}" onclick="event.stopPropagation()" data-confirm="Le missioni contenute in questa esportazione verranno eliminate definitivamente." data-confirm-title="Eliminare l'esportazione?" data-confirm-ok="Elimina" data-confirm-danger="1">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="icon-btn icon-danger" title="Elimina" aria-label="Elimina">✕</button>
                     </form>
